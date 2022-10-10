@@ -9,12 +9,25 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
+	"strconv"
 
 	"github.com/hashicorp/vault/shamir"
 )
 
 func main() {
 	//fmt.Println("Hello World!!")
+
+	if len(os.Args) != 2 {
+		fmt.Println("Please provide a filepath")
+		return
+	}
+	filepath := os.Args[1]
+	/*file, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println("Error opening %s: %s", filepath, err)
+	}*/
+
 	pass := "Hello, World!!"
 	shares := 5
 	threshold := 2
@@ -24,11 +37,11 @@ func main() {
 	c.Write([]byte(pass))
 	key := c.Sum(nil)
 
-	text, err := ioutil.ReadFile("store.txt")
+	text, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(text))
+	//fmt.Println(string(text))
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -47,28 +60,56 @@ func main() {
 
 	var secret []byte = gcm.Seal(nonce, nonce, text, nil)
 
-	err = ioutil.WriteFile("secret.bin", secret, 0777)
+	err = ioutil.WriteFile("files/secret.bin", secret, 0777)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	n, err := shamir.Split(secret, shares, threshold)
+	//fmt.Printf("%t", n[0][0])
 	// fmt.Println(n)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var parts []byte
+	//err = ioutil.WriteFile("files/share.txt", n, 0777)
+	file, err := os.Create("files/shares.txt")
+	if err != nil {
+		log.Fatal("os.Create", err)
+	}
+
+	for l := 0; l < shares; l++ {
+		z := strconv.Itoa(l)
+		fmt.Fprintf(file, z)
+		fmt.Fprintln(file, n[l])
+	}
+	fmt.Println("Shares created Successfully")
+	a := len(n[0])
+
 	var j int
 
-	fmt.Scanf("Enter the Number of Secret Shares you want to enter: ", &j)
+	fmt.Print("Enter the Number of Secret Shares you want to enter: ")
+	fmt.Scanf("%d", &j)
+	if j < 2 {
+		fmt.Println("Please enter the minimum number of Shares i.e. 2")
+		return
+	} else if j > shares {
+		fmt.Println("Exceeded the Number of Shares!!")
+		return
+	}
+	var parts [60][60]byte
 	for i := 0; i < j; i++ {
-		fmt.Scanf("Enter the Secret Share: ", &parts[i])
-	}
+		fmt.Println("Enter the Secret Share: ")
+		for x := 0; x < a; x++ {
+			fmt.Scanf("%d", &parts[i][x])
+		}
 
-	for _, i := range n {
-		fmt.Println(i)
 	}
+	fmt.Println("DONE")
+
+	//for _, i := range n {
+	//	fmt.Println(i)
+	//}
 
 	//fmt.Println(secret)
 	//fmt.Println(key)
