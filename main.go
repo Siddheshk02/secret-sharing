@@ -28,7 +28,7 @@ func main() {
 	}*/
 
 	pass := "Hello, World!!"
-	shares := 15
+	shares := 5
 	threshold := 2
 
 	c := sha256.New()
@@ -85,19 +85,25 @@ func main() {
 	fmt.Println("Shares created Successfully")
 	a := len(n[0])
 	//fmt.Println(a)
-
-	var j int
 label:
+	var j int
+
 	fmt.Print("Enter the Number of Secret Shares you want to enter: ")
 	fmt.Scanf("%d", &j)
+
 	if j < 2 {
 		fmt.Println("Please enter the minimum number of Shares i.e. 2")
+		fmt.Println(" ")
+
 		goto label
 	} else if j > shares {
 		fmt.Println("Exceeded the Number of Shares!!")
-		return
+
+		goto label
 	}
+
 	var parts [10][51]byte
+
 	for i := 0; i < j; i++ {
 		fmt.Print("Enter the Secret Share: ")
 		for x := 0; x < a; x++ {
@@ -108,31 +114,56 @@ label:
 
 	}
 
-	//var boolean bool
+	boolean := true
+	var loc int
+
 	for i := 0; i < j; i++ {
+		boolean = true
 		for x := 0; x < shares; x++ {
-			if (parts[i][0] == n[x][1]) && (parts[i][1] == n[x][1]) {
+			if (parts[i][0] == n[x][0]) && (parts[i][1] == n[x][1]) {
 				//var eg [60]byte = parts[i]
 				//bool := bytes.Equal(eg, n[x])
-				//boolean = true
+
 				for p := 0; p < len(n[0]); p++ {
 					if parts[i][p] != n[x][p] {
-						//boolean = false
+						boolean = false
+						loc = i + 1
+						goto label1
 					}
 				}
 			}
 		}
 	}
-	//if boolean == true {
-	//	fmt.Println("Invalid Share!!!")
-	//	return
-	//}
-	/*else {
-		fmt.Println("Welcome!!!!")
-	}*/
 
-	fmt.Println(parts[0])
-	fmt.Println(parts[1])
+label1:
+
+	if boolean == false {
+		fmt.Println("Invalid Share ", loc)
+		goto label
+	}
+
+	fileloc := "C:/Users/user/go/src/github.com/Siddheshk02/secret-sharing/files/secret.bin"
+
+	ciphertext, err := os.ReadFile(fileloc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	nonce1 := ciphertext[:gcm.NonceSize()]
+	ciphertext = ciphertext[gcm.NonceSize():]
+	plaintext, err := gcm.Open(nil, nonce1, ciphertext, nil)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	err = ioutil.WriteFile("Users/encrypted.txt", plaintext, 0777)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("File Decrypted Successfully!!")
+
+	//fmt.Println(parts[0])
+	//fmt.Println(parts[1])
 	//fmt.Println(n[0][1])
 
 	//for _, i := range n {
