@@ -85,9 +85,9 @@ func main() {
 	fmt.Println("Shares created Successfully")
 	a := len(n[0])
 	//fmt.Println(a)
-label:
-	var j int
 
+	var j int
+label:
 	fmt.Print("Enter the Number of Secret Shares you want to enter: ")
 	fmt.Scanf("%d", &j)
 
@@ -114,6 +114,22 @@ label:
 
 	}
 
+	for h := 0; h < j; h++ {
+		var con string
+		if (parts[h][0] == parts[h+1][0]) && (parts[h][1] == parts[h+1][1]) {
+			fmt.Println("Share ", h+1, " is repeated")
+			fmt.Print("Do you Want to continue? Yes/No :")
+			fmt.Scan(&con)
+			fmt.Println(" ")
+			if con == "Yes" {
+				goto label
+			} else {
+				return
+			}
+
+		}
+	}
+
 	boolean := true
 	var loc int
 
@@ -138,8 +154,16 @@ label:
 label1:
 
 	if boolean == false {
+		var con string
 		fmt.Println("Invalid Share ", loc)
-		goto label
+		fmt.Print("Do you Want to continue? Yes/No :")
+		fmt.Scan(&con)
+		fmt.Println(" ")
+		if con == "Yes" {
+			goto label
+		} else {
+			return
+		}
 	}
 
 	fileloc := "C:/Users/user/go/src/github.com/Siddheshk02/secret-sharing/files/secret.bin"
