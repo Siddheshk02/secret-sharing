@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/hashicorp/vault/shamir"
 )
@@ -29,7 +28,7 @@ func main() {
 	}*/
 
 	pass := "Hello, World!!"
-	shares := 5
+	shares := 15
 	threshold := 2
 
 	c := sha256.New()
@@ -79,33 +78,62 @@ func main() {
 	}
 
 	for l := 0; l < shares; l++ {
-		z := strconv.Itoa(l)
-		fmt.Fprintf(file, z)
+		//z := strconv.Itoa(l)
+		//fmt.Fprintf(file, z)
 		fmt.Fprintln(file, n[l])
 	}
 	fmt.Println("Shares created Successfully")
 	a := len(n[0])
+	//fmt.Println(a)
 
 	var j int
-
+label:
 	fmt.Print("Enter the Number of Secret Shares you want to enter: ")
 	fmt.Scanf("%d", &j)
 	if j < 2 {
 		fmt.Println("Please enter the minimum number of Shares i.e. 2")
-		return
+		goto label
 	} else if j > shares {
 		fmt.Println("Exceeded the Number of Shares!!")
 		return
 	}
-	var parts [60][60]byte
+	var parts [10][51]byte
 	for i := 0; i < j; i++ {
-		fmt.Println("Enter the Secret Share: ")
+		fmt.Print("Enter the Secret Share: ")
 		for x := 0; x < a; x++ {
-			fmt.Scanf("%d", &parts[i][x])
+			fmt.Scan(&parts[i][x])
+
 		}
+		fmt.Println(" ")
 
 	}
-	fmt.Println("DONE")
+
+	//var boolean bool
+	for i := 0; i < j; i++ {
+		for x := 0; x < shares; x++ {
+			if (parts[i][0] == n[x][1]) && (parts[i][1] == n[x][1]) {
+				//var eg [60]byte = parts[i]
+				//bool := bytes.Equal(eg, n[x])
+				//boolean = true
+				for p := 0; p < len(n[0]); p++ {
+					if parts[i][p] != n[x][p] {
+						//boolean = false
+					}
+				}
+			}
+		}
+	}
+	//if boolean == true {
+	//	fmt.Println("Invalid Share!!!")
+	//	return
+	//}
+	/*else {
+		fmt.Println("Welcome!!!!")
+	}*/
+
+	fmt.Println(parts[0])
+	fmt.Println(parts[1])
+	//fmt.Println(n[0][1])
 
 	//for _, i := range n {
 	//	fmt.Println(i)
